@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIFA World Cup 2026 — Live Stats & Standings</title>
+    <meta name="description" content="Live FIFA World Cup 2026 standings, scores, and match schedule powered by ESPN.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090a;
+            --panel: #0f1011;
+            --surface: #191a1b;
+            --surface-2: #1e1f20;
+            --surface-hover: #28282c;
+            --fg: #f7f8f8;
+            --fg2: #d0d6e0;
+            --fg3: #8a8f98;
+            --fg4: #62666d;
+            --accent: #5e6ad2;
+            --accent-bright: #7170ff;
+            --accent-hover: #828fff;
+            --green: #10b981;
+            --green-dim: rgba(16,185,129,0.15);
+            --red: #ef4444;
+            --red-dim: rgba(239,68,68,0.12);
+            --yellow: #f59e0b;
+            --yellow-dim: rgba(245,158,11,0.12);
+            --border: rgba(255,255,255,0.05);
+            --border2: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-feature-settings: "cv01", "ss03";
+            background: var(--bg); color: var(--fg2);
+            line-height: 1.6; -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--panel); border-bottom: 1px solid var(--border);
+            padding: 0 24px; backdrop-filter: blur(12px);
+        }
+        nav .inner {
+            max-width: 1280px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 52px;
+        }
+        nav .logo {
+            font-weight: 590; font-size: 15px; color: var(--fg);
+            letter-spacing: -0.02em; text-decoration: none;
+            display: flex; align-items: center; gap: 10px;
+        }
+        nav .logo .emoji { font-size: 20px; }
+        nav .links { display: flex; gap: 24px; align-items: center; }
+        nav .links a {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        nav .links a:hover, nav .links a.active { color: var(--fg); }
+
+        /* Tabs */
+        .tabs {
+            max-width: 1280px; margin: 0 auto; padding: 0 24px;
+            display: flex; gap: 0; border-bottom: 1px solid var(--border);
+        }
+        .tab {
+            font-size: 14px; font-weight: 510; color: var(--fg3);
+            padding: 12px 20px; cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s; background: none; border-top: none;
+            border-left: none; border-right: none;
+        }
+        .tab:hover { color: var(--fg); }
+        .tab.active { color: var(--fg); border-bottom-color: var(--fg); }
+
+        /* Hero */
+        .hero {
+            max-width: 1280px; margin: 0 auto; padding: 40px 24px 24px;
+            text-align: left;
+        }
+        .hero h1 {
+            font-size: 48px; font-weight: 590; line-height: 1.05;
+            letter-spacing: -1.1px; color: var(--fg); margin-bottom: 8px;
+        }
+        .hero .sub {
+            font-size: 16px; color: var(--fg3); max-width: 600px; line-height: 1.5;
+        }
+        .hero .live-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--green-dim); border: 1px solid rgba(16,185,129,0.25);
+            border-radius: 9999px; padding: 3px 12px 3px 8px;
+            font-size: 12px; font-weight: 510; color: var(--green);
+            margin-bottom: 12px;
+        }
+        .live-badge .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--green); animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Content container */
+        .content {
+            max-width: 1280px; margin: 0 auto; padding: 24px;
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* Section heading */
+        .section-title {
+            font-size: 14px; font-weight: 510; color: var(--fg3);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        /* Standings */
+        .groups-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 16px;
+        }
+        .group-card {
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 10px; overflow: hidden;
+        }
+        .group-header {
+            font-size: 13px; font-weight: 510; color: var(--fg3);
+            padding: 12px 16px; border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+        }
+        .standings-table {
+            width: 100%; border-collapse: collapse;
+        }
+        .standings-table th {
+            text-align: left; padding: 8px 10px; font-size: 11px;
+            font-weight: 510; color: var(--fg4);
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .standings-table th:not(:first-child) { text-align: center; }
+        .standings-table td {
+            padding: 8px 10px; font-size: 13px; color: var(--fg2);
+            border-bottom: 1px solid var(--border);
+        }
+        .standings-table td:not(:first-child) { text-align: center; }
+        .standings-table tr:last-child td { border-bottom: none; }
+        .standings-table .team-cell {
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 510; color: var(--fg); white-space: nowrap;
+        }
+        .team-flag {
+            width: 22px; height: 16px; border-radius: 2px;
+            object-fit: cover; vertical-align: middle;
+            background: var(--surface-hover);
+        }
+        .standings-table .advance { color: var(--green); font-size: 11px; font-weight: 510; }
+        .standings-table .eliminated { color: var(--red); font-size: 11px; font-weight: 510; }
+        .standings-table .best8 { color: var(--yellow); font-size: 11px; font-weight: 510; }
+        .gd-pos { color: var(--green); }
+        .gd-neg { color: var(--red); }
+        .gd-zero { color: var(--fg3); }
+
+        /* Match cards */
+        .matches-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+        .match-card {
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 10px; padding: 16px; overflow: hidden;
+        }
+        .match-card .round {
+            font-size: 11px; font-weight: 510; color: var(--fg4);
+            text-transform: uppercase; letter-spacing: 0.3px;
+            margin-bottom: 12px;
+        }
+        .match-teams { display: flex; flex-direction: column; gap: 8px; }
+        .match-team {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .match-team .info {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .match-team .name {
+            font-size: 14px; font-weight: 510; color: var(--fg);
+        }
+        .match-team .score {
+            font-size: 16px; font-weight: 590; color: var(--fg);
+            min-width: 24px; text-align: right;
+            font-feature-settings: "tnum";
+        }
+        .match-status {
+            margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .match-status .time {
+            font-size: 12px; font-weight: 510; color: var(--fg3);
+        }
+        .status-live {
+            background: var(--green); color: #fff;
+            border-radius: 9999px; padding: 2px 8px;
+            font-size: 11px; font-weight: 510;
+        }
+        .status-ft {
+            background: rgba(255,255,255,0.08); color: var(--fg3);
+            border-radius: 9999px; padding: 2px 8px;
+            font-size: 11px; font-weight: 510;
+        }
+        .status-scheduled {
+            background: var(--accent); color: #fff;
+            border-radius: 9999px; padding: 2px 8px;
+            font-size: 11px; font-weight: 510;
+        }
+
+        /* Top scorers */
+        .scorers-list {
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .scorer-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px; background: var(--surface);
+            border: 1px solid var(--border2); border-radius: 8px;
+        }
+        .scorer-rank {
+            font-size: 14px; font-weight: 590; color: var(--fg4);
+            width: 24px; text-align: center;
+        }
+        .scorer-info { flex: 1; }
+        .scorer-name { font-size: 14px; font-weight: 510; color: var(--fg); }
+        .scorer-team { font-size: 12px; color: var(--fg3); }
+        .scorer-goals {
+            font-size: 20px; font-weight: 590; color: var(--accent-bright);
+        }
+        .scorer-goals-label {
+            font-size: 11px; color: var(--fg4); text-align: center;
+        }
+        .no-data {
+            padding: 40px; text-align: center;
+            font-size: 14px; color: var(--fg4);
+        }
+        .no-data .icon { font-size: 32px; margin-bottom: 12px; }
+
+        /* Footer */
+        footer {
+            max-width: 1280px; margin: 40px auto 0; padding: 24px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+        }
+        footer .left { font-size: 12px; color: var(--fg4); }
+        footer .right { display: flex; gap: 16px; }
+        footer .right a {
+            font-size: 12px; font-weight: 510; color: var(--fg3);
+            text-decoration: none; transition: color 0.15s;
+        }
+        footer .right a:hover { color: var(--fg); }
+
+        /* Loading */
+        .loading {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 80px 24px;
+        }
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid var(--border2);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin-bottom: 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading p { font-size: 14px; color: var(--fg3); }
+
+        /* Error */
+        .error-box {
+            background: var(--red-dim); border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 8px; padding: 16px 20px; margin: 24px 0;
+            font-size: 14px; color: var(--red);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; letter-spacing: -0.7px; }
+            .groups-grid { grid-template-columns: 1fr; }
+            .matches-grid { grid-template-columns: 1fr; }
+            nav .inner { padding: 0; }
+            footer { flex-direction: column; text-align: center; }
+            footer .right { justify-content: center; }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .groups-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="inner">
+        <a class="logo" href="/">
+            <span class="emoji">⚽</span> WC 2026
+        </a>
+        <div class="links">
+            <a href="https://github.com/cappy-dev/wc2026-tracker">GitHub</a>
+            <a href="https://www.espn.com/soccer/scoreboard/_/league/FIFA.WORLD">ESPN</a>
+        </div>
+    </div>
+</nav>
+
+<div class="tabs">
+    <button class="tab active" data-tab="standings">Standings</button>
+    <button class="tab" data-tab="matches">Matches</button>
+    <button class="tab" data-tab="scorers">Top Scorers</button>
+</div>
+
+<div class="hero">
+    <div class="live-badge"><span class="dot"></span> LIVE</div>
+    <h1>FIFA World Cup 2026</h1>
+    <p class="sub">Standings, scores, and match results — updated live from the ESPN API. 48 teams, 12 groups, one trophy.</p>
+</div>
+
+<div class="content">
+    <!-- Standings -->
+    <div class="section active" id="standings">
+        <div class="section-title">Group Stage Standings</div>
+        <div id="standings-container">
+            <div class="loading"><div class="spinner"></div><p>Loading standings...</p></div>
+        </div>
+    </div>
+
+    <!-- Matches -->
+    <div class="section" id="matches">
+        <div class="section-title">Match Results & Schedule</div>
+        <div id="matches-container">
+            <div class="loading"><div class="spinner"></div><p>Loading matches...</p></div>
+        </div>
+    </div>
+
+    <!-- Top Scorers -->
+    <div class="section" id="scorers">
+        <div class="section-title">Golden Boot Race</div>
+        <div id="scorers-container">
+            <div class="loading"><div class="spinner"></div><p>Loading top scorers...</p></div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="left">Data from ESPN public API. Not affiliated with FIFA.</div>
+    <div class="right">
+        <a href="https://github.com/cappy-dev/wc2026-tracker">Source</a>
+        <a href="https://www.espn.com/soccer/schedule/_/league/FIFA.WORLD">ESPN Schedule</a>
+        <a href="https://github.com/pseudo-r/Public-ESPN-API">ESPN API Docs</a>
+    </div>
+</footer>
+
+<script>
+const API_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
+const API_V2 = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world';
+const CORE_API = 'https://sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.world';
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+});
+
+// Status text map
+const STATUS_MAP = {
+    'status_scheduled': 'Scheduled',
+    'status_live': 'LIVE',
+    'status_complete': 'FT',
+    'status_full_time': 'FT',
+    'status_halftime': 'HT',
+    'status_in_progress': 'LIVE',
+    'status_postponed': 'Postponed',
+    'status_cancelled': 'Cancelled',
+};
+
+function formatStatus(comp) {
+    const type = comp.status?.type?.name || '';
+    const detail = comp.status?.type?.description || '';
+    if (type.includes('in_progress') || type.includes('live') || type.includes('halftime')) {
+        const clock = comp.status?.displayClock || '';
+        const period = comp.status?.period || '';
+        return `<span class="status-live">${detail || 'LIVE'}${clock ? ' ' + clock : ''}</span>`;
+    }
+    if (type.includes('complete') || type.includes('full_time') || type === 'status_full_time') {
+        return `<span class="status-ft">FT</span>`;
+    }
+    if (type.includes('scheduled')) {
+        const date = new Date(comp.date);
+        const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        return `<span class="status-scheduled">${dateStr} ${timeStr}</span>`;
+    }
+    return `<span class="status-ft">${detail || type}</span>`;
+}
+
+function gdClass(val) {
+    const n = parseInt(val);
+    if (n > 0) return 'gd-pos';
+    if (n < 0) return 'gd-neg';
+    return 'gd-zero';
+}
+
+function noteClass(note) {
+    if (!note) return '';
+    const d = (note.description || '').toLowerCase();
+    const c = (note.color || '').toLowerCase();
+    if (d.includes('advance') || c.includes('81d6ac')) return 'advance';
+    if (d.includes('eliminated') || c.includes('e04545')) return 'eliminated';
+    if (d.includes('best') || c.includes('f4a623')) return 'best8';
+    return '';
+}
+
+// Fetch and render standings
+async function loadStandings() {
+    try {
+        const res = await fetch(`${API_V2}/standings`);
+        const data = await res.json();
+        const container = document.getElementById('standings-container');
+        if (!data.children || data.children.length === 0) {
+            container.innerHTML = '<div class="no-data"><div class="icon">📋</div><p>Standings not yet available</p></div>';
+            return;
+        }
+
+        let html = '<div class="groups-grid">';
+        for (const group of data.children) {
+            const entries = group.standings?.entries || [];
+            html += `<div class="group-card">`;
+            html += `<div class="group-header">${group.name}</div>`;
+            html += `<table class="standings-table">`;
+            html += `<tr>
+                <th style="text-align:left">Team</th>
+                <th>GP</th><th>W</th><th>D</th><th>L</th>
+                <th>F</th><th>A</th><th>GD</th><th>Pts</th>
+            </tr>`;
+            for (const entry of entries) {
+                const team = entry.team;
+                const s = {};
+                entry.stats.forEach(st => { s[st.name] = st.displayValue; });
+                const note = entry.note || {};
+                const nc = noteClass(note);
+                const noteLabel = note.description || '';
+
+                html += `<tr>`;
+                html += `<td><div class="team-cell">
+                    <img class="team-flag" src="${team.logos?.[0]?.href || ''}" alt="${team.displayName}" onerror="this.style.display='none'">
+                    ${team.displayName}
+                </div></td>`;
+                html += `<td>${s.gamesPlayed || '0'}</td>`;
+                html += `<td>${s.wins || '0'}</td>`;
+                html += `<td>${s.ties || '0'}</td>`;
+                html += `<td>${s.losses || '0'}</td>`;
+                html += `<td>${s.pointsFor || '0'}</td>`;
+                html += `<td>${s.pointsAgainst || '0'}</td>`;
+                html += `<td class="${gdClass(s.pointDifferential)}">${s.pointDifferential || '0'}</td>`;
+                html += `<td style="font-weight:590;color:var(--fg)">${s.points || '0'}</td>`;
+                html += `</tr>`;
+                if (noteLabel) {
+                    html += `<tr><td colspan="9" style="padding:2px 10px 6px;border-bottom:1px solid var(--border)">
+                        <span class="${nc}">${noteLabel}</span>
+                    </td></tr>`;
+                }
+            }
+            html += `</table></div>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    } catch (e) {
+        document.getElementById('standings-container').innerHTML =
+            `<div class="error-box">Failed to load standings: ${e.message}</div>`;
+    }
+}
+
+// Fetch and render matches
+async function loadMatches() {
+    try {
+        const res = await fetch(`${API_BASE}/scoreboard`);
+        const data = await res.json();
+        const container = document.getElementById('matches-container');
+        const events = data.events || [];
+
+        if (events.length === 0) {
+            container.innerHTML = '<div class="no-data"><div class="icon">⚽</div><p>No matches available right now</p></div>';
+            return;
+        }
+
+        let html = '<div class="matches-grid">';
+        for (const ev of events) {
+            const comp = ev.competitions?.[0];
+            if (!comp) continue;
+
+            const round = comp.round || {};
+            const roundName = round.displayName || ev.status?.type?.description || 'Match';
+
+            html += `<div class="match-card">`;
+            html += `<div class="round">${roundName}</div>`;
+            html += `<div class="match-teams">`;
+
+            for (const competitor of comp.competitors || []) {
+                const t = competitor.team;
+                const isHome = competitor.homeAway === 'home';
+                html += `<div class="match-team">
+                    <div class="info">
+                        <img class="team-flag" src="${t.logos?.[0]?.href || ''}" alt="${t.displayName}" onerror="this.style.display='none'">
+                        <span class="name">${t.displayName}</span>
+                    </div>
+                    <span class="score">${competitor.score || '–'}</span>
+                </div>`;
+            }
+
+            html += `</div>`;
+            html += `<div class="match-status">
+                <span class="time">${new Date(comp.date).toLocaleDateString('en-US', {month:'short',day:'numeric'})}</span>
+                ${formatStatus(comp)}
+            </div>`;
+            html += `</div>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    } catch (e) {
+        document.getElementById('matches-container').innerHTML =
+            `<div class="error-box">Failed to load matches: ${e.message}</div>`;
+    }
+}
+
+// Fetch top scorers
+async function loadScorers() {
+    try {
+        const res = await fetch(`${CORE_API}/leaders`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const container = document.getElementById('scorers-container');
+
+        // Leaders API returns categories — find goals
+        const leaders = data.leaders || [];
+        if (leaders.length === 0) {
+            container.innerHTML = '<div class="no-data"><div class="icon">🏆</div><p>Top scorer data not yet available</p></div>';
+            return;
+        }
+
+        let html = '<div class="scorers-list">';
+        let rank = 1;
+        for (const category of leaders) {
+            const leaderList = category.leaders || [];
+            for (const leader of leaderList) {
+                const athlete = leader.athlete || {};
+                const team = leader.team || {};
+                const value = leader.value || 0;
+
+                html += `<div class="scorer-row">
+                    <div class="scorer-rank">${rank}</div>
+                    <img class="team-flag" src="${athlete.flag?.href || team.logos?.[0]?.href || ''}" alt="" onerror="this.style.display='none'" style="width:28px;height:20px;">
+                    <div class="scorer-info">
+                        <div class="scorer-name">${athlete.displayName || 'Unknown'}</div>
+                        <div class="scorer-team">${team.displayName || ''}</div>
+                    </div>
+                    <div>
+                        <div class="scorer-goals">${value}</div>
+                        <div class="scorer-goals-label">goals</div>
+                    </div>
+                </div>`;
+                rank++;
+            }
+        }
+        html += '</div>';
+        container.innerHTML = html || '<div class="no-data"><div class="icon">🏆</div><p>Top scorer data not yet available</p></div>';
+    } catch (e) {
+        document.getElementById('scorers-container').innerHTML =
+            `<div class="no-data"><div class="icon">🏆</div><p>Top scorer data not yet available</p></div>`;
+    }
+}
+
+// Load everything
+loadStandings();
+loadMatches();
+loadScorers();
+
+// Auto-refresh standings and matches every 60s
+setInterval(() => {
+    loadStandings();
+    loadMatches();
+}, 60000);
+</script>
+</body>
+</html>
