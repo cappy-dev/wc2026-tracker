@@ -484,7 +484,9 @@ async function loadMatches() {
         const res = await fetch(`${API_BASE}/scoreboard`);
         const data = await res.json();
         const container = document.getElementById('matches-container');
-        const events = data.events || [];
+        const today = new Date().toDateString();
+        const events = (data.events || []).filter(ev => 
+            new Date(ev.date).toDateString() === today);
 
         if (events.length === 0) {
             container.innerHTML = '<div class="no-data"><div class="icon">⚽</div><p>No matches available right now</p></div>';
