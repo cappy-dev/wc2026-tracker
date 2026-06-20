@@ -394,9 +394,9 @@ function formatStatus(comp) {
     }
     if (type.includes('scheduled')) {
         const date = new Date(comp.date);
-        const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-        const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-        return `<span class="status-scheduled">${dateStr} ${timeStr}</span>`;
+        const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        const dateStr = date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+        return `<span class="status-scheduled">${dateStr} @ ${timeStr} local</span>`;
     }
     return `<span class="status-ft">${detail || type}</span>`;
 }
@@ -434,7 +434,8 @@ async function loadStandings() {
             const entries = group.standings?.entries || [];
             html += `<div class="group-card">`;
             html += `<div class="group-header">${group.name}</div>`;
-            html += `<table class="standings-table">`;
+            <div style="overflow-x: auto; width: 100%; min-width: 300px;">
+            <table class="standings-table">
             html += `<tr>
                 <th style="text-align:left">Team</th>
                 <th>GP</th><th>W</th><th>D</th><th>L</th>
@@ -448,7 +449,7 @@ async function loadStandings() {
                 const nc = noteClass(note);
                 const noteLabel = note.description || '';
 
-                html += `<tr>`;
+                html += `</table></div>`;
                 html += `<td><div class="team-cell">
                     <img class="team-flag" src="${team.logos?.[0]?.href || ''}" alt="${team.displayName}" onerror="this.style.display='none'">
                     ${team.displayName}
@@ -461,7 +462,7 @@ async function loadStandings() {
                 html += `<td>${s.pointsAgainst || '0'}</td>`;
                 html += `<td class="${gdClass(s.pointDifferential)}">${s.pointDifferential || '0'}</td>`;
                 html += `<td style="font-weight:590;color:var(--fg)">${s.points || '0'}</td>`;
-                html += `</tr>`;
+                html += `</table></div>`;
                 if (noteLabel) {
                     html += `<tr><td colspan="9" style="padding:2px 10px 6px;border-bottom:1px solid var(--border)">
                         <span class="${nc}">${noteLabel}</span>
