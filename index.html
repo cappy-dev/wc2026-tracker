@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Cup 2026 — Live</title>
+    <title>World Cup 2026 | Live</title>
     <meta name="description" content="Live FIFA World Cup 2026 standings, scores, and match schedule powered by ESPN.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
@@ -316,7 +316,7 @@
 <div class="hero">
     <div class="live-badge"><span class="dot"></span> LIVE</div>
     <h1>FIFA World Cup 2026</h1>
-    <p class="sub">Standings, scores, and match results — updated live from the ESPN API. 48 teams, 12 groups, one trophy.</p>
+    <p class="sub">Standings, scores, and match results, updated live from the ESPN API. 48 teams, 12 groups, one trophy.</p>
 </div>
 
 <div class="content">
@@ -540,7 +540,7 @@ async function loadScorers() {
         const data = await res.json();
         const container = document.getElementById('scorers-container');
 
-        // Leaders API returns categories — find goals
+        // Leaders API returns categories: find goals
         const leaders = data.leaders || [];
         if (leaders.length === 0) {
             container.innerHTML = '<div class="no-data"><div class="icon">🏆</div><p>Top scorer data not yet available</p></div>';
