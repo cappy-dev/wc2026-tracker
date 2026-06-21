@@ -1,4 +1,4 @@
-# ⚽ FIFA World Cup 2026 Tracker
+# FIFA World Cup 2026 Tracker
 
 Live standings, scores, and match results for the 2026 FIFA World Cup — powered by the [ESPN public API](https://github.com/pseudo-r/Public-ESPN-API).
 
