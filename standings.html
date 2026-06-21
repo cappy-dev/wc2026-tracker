@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Cup 2026 | Live</title>
-    <meta name="description" content="Live FIFA World Cup 2026 standings, scores, and match schedule powered by ESPN.">
+    <title>Standings | WC 2026</title>
+    <meta name="description" content="Live FIFA World Cup 2026 group stage standings. Group A through L tables, points, goal difference.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://site.api.espn.com">
@@ -12,7 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;510;590;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script>(function(){var t=localStorage.getItem('wc2026-theme');if(!t)t=window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)})();</script>
-
 </head>
 <body>
 
@@ -33,7 +32,7 @@
 </nav>
 
 <div class="page-nav">
-    <a href="standings.html">Standings</a>
+    <a href="standings.html" class="active">Standings</a>
     <a href="matches.html">Matches</a>
     <a href="scorers.html">Top Scorers</a>
     <a href="teams.html">Teams</a>
@@ -42,57 +41,15 @@
 <main id="main">
 <div class="hero">
     <div class="live-badge"><span class="dot"></span> LIVE</div>
-    <h1>FIFA World Cup 2026</h1>
-    <p class="sub">Live scores, real-time standings, and the Golden Boot race from the 2026 FIFA World Cup.</p>
-</div>
-
-<div id="featured-match" class="featured-match">
-    <div class="featured-match-inner">
-        <div class="fm-skeleton">
-            <div class="fm-skeleton-crests">
-                <div class="skeleton-crest"></div>
-                <div class="skeleton-vs" style="color:var(--fg4);font-size:14px;">vs</div>
-                <div class="skeleton-crest"></div>
-            </div>
-            <div class="skeleton-line" style="width:200px;margin:16px auto 0;"></div>
-        </div>
-    </div>
+    <h1>Group Stage Standings</h1>
+    <p class="sub">48 teams, 12 groups. The top two from each group plus the eight best third-placed teams advance to the knockout stage.</p>
 </div>
 
 <div class="content">
-    <div class="snapshot-grid">
-        <div class="snapshot-card" id="standings-snippet">
-            <div class="snapshot-header">
-                <span class="snapshot-title">Standings</span>
-                <a class="snapshot-link" href="standings.html">View all groups</a>
-            </div>
-            <div class="ss-skeleton">
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line" style="width:60%"></div>
-            </div>
-        </div>
-        <div class="snapshot-card" id="scorer-snippet">
-            <div class="snapshot-header">
-                <span class="snapshot-title">Top Scorers</span>
-                <a class="snapshot-link" href="scorers.html">View all</a>
-            </div>
-            <div class="ss-skeleton">
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line" style="width:60%"></div>
-            </div>
-        </div>
+    <div class="section-title">Standings</div>
+    <div id="standings-container">
+        <div class="loading" role="status" aria-live="polite"><div class="spinner"></div><p>Loading standings...</p><div class="loading-msg"></div></div>
     </div>
-</div>
-
-<div class="content">
-    <div class="section-title">Latest News</div>
-    <div id="news-container"><div class="ss-skeleton"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div></div>
 </div>
 </main>
 
@@ -106,6 +63,6 @@
 </footer>
 
 <script src="app.js"></script>
-<script>initLanding();</script>
+<script>initStandings();</script>
 </body>
 </html>
