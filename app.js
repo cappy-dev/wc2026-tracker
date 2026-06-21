@@ -459,7 +459,7 @@ async function fetchNews() {
         clearLoadingMessages('news-container');
         const headlines = data.headlines || [];
         if (headlines.length === 0) {
-            container.innerHTML = '';
+            container.innerHTML = '<div class="no-data"><p>No news at this time</p></div>';
             return;
         }
         let html = '';
@@ -478,6 +478,7 @@ async function fetchNews() {
         container.innerHTML = html;
     } catch (e) {
         if (e.name === 'AbortError') return;
+        container.innerHTML = '';
     }
 }
 
@@ -550,7 +551,7 @@ async function fetchFeaturedMatch() {
             const t = c.team;
             const url = flagUrl(t);
             html += `<div class="fm-team">
-                <img class="fm-team-crest" src="${url}" alt="" loading="lazy" onerror="this.style.display='none'">
+                <img class="fm-team-crest" src="${url}" alt="${t.displayName}" loading="lazy" onerror="this.style.display='none'">
                 <div class="fm-team-name"><img class="fm-team-flag" src="${url}" alt="" loading="lazy" onerror="this.style.display='none'">${t.displayName}</div>
             </div>`;
             if (i === 0) {
@@ -616,6 +617,7 @@ async function fetchStandingsSnippet() {
             table += `<tr><td>${i + 1}</td><td><div class="ss-team"><img class="ss-flag" src="${flag}" alt="" loading="lazy" onerror="this.style.display='none'">${team.displayName}</div></td><td class="${gdClass}">${gd}</td><td class="ss-pts">${s.points || '0'}</td></tr>`;
         }
         table += '</table>';
+        table += '<div class="snapshot-legend">GD = Goal difference</div>';
         container.innerHTML = header + table;
     } catch (e) {
         if (e.name === 'AbortError') return;

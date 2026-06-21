@@ -147,11 +147,13 @@ nav .links a:focus-visible {
     text-align: left;
 }
 .hero h1 {
-    font-size: 48px; font-weight: 590; line-height: 1.05;
-    letter-spacing: -1.1px; color: var(--fg); margin-bottom: 8px;
+    font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 590; line-height: 1.05;
+    letter-spacing: -0.03em; color: var(--fg); margin-bottom: 8px;
+    text-wrap: balance;
 }
 .hero .sub {
-    font-size: 16px; color: var(--fg3); max-width: 600px; line-height: 1.5;
+    font-size: 16px; color: var(--fg3); max-width: 65ch; line-height: 1.5;
+    text-wrap: pretty;
 }
 .hero .live-badge {
     display: inline-flex; align-items: center; gap: 6px;
@@ -517,7 +519,6 @@ footer .right a:hover { color: var(--fg); }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .hero h1 { font-size: 32px; letter-spacing: -0.7px; }
     .groups-grid { grid-template-columns: 1fr; }
     .matches-grid { grid-template-columns: 1fr; }
     nav .inner { padding: 0; }
@@ -674,6 +675,13 @@ footer .right a:hover { color: var(--fg); }
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-line, .skeleton-crest {
+        animation: none;
+        background: var(--surface-hover);
+    }
+}
+
 @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
@@ -749,6 +757,12 @@ footer .right a:hover { color: var(--fg); }
 
 .snapshot-standings .ss-pts {
     font-weight: 590; color: var(--fg);
+}
+
+.snapshot-legend {
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--fg4);
 }
 
 /* Scorer snippet rows */
