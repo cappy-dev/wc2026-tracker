@@ -2,7 +2,7 @@
 
 Live standings, scores, and match results for the 2026 FIFA World Cup, powered by the [ESPN public API](https://github.com/pseudo-r/Public-ESPN-API).
 
-**Live at:** [cappy-dev.github.io/wc2026-tracker](https://cappy-dev.github.io/wc2026-tracker/)
+**Live at:** [Project516.github.io/wc2026-tracker](https://project516.github.io/wc2026-tracker/)
 
 ## Features
 
