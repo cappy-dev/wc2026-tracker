@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matches | WC 2026</title>
-    <meta name="description" content="Live FIFA World Cup 2026 match scores and schedule. Today's results and upcoming fixtures.">
+    <title>Knockouts | WC 2026</title>
+    <meta name="description" content="FIFA World Cup 2026 knockout stage results and bracket. Round of 32 through the Final.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://site.api.espn.com">
@@ -33,8 +33,8 @@
 
 <div class="page-nav">
     <a href="standings.html">Standings</a>
-    <a href="matches.html" class="active">Matches</a>
-    <a href="knockouts.html">Knockouts</a>
+    <a href="matches.html">Matches</a>
+    <a href="knockouts.html" class="active">Knockouts</a>
     <a href="scorers.html">Top Scorers</a>
     <a href="teams.html">Teams</a>
 </div>
@@ -42,18 +42,13 @@
 <main id="main">
 <div class="hero">
     <div class="live-badge"><span class="dot"></span> LIVE</div>
-    <h1>Match Results &amp; Schedule</h1>
-    <p class="sub">Every World Cup match, live scores and full-time results. All times shown in your local timezone.</p>
+    <h1>Knockout Stage</h1>
+    <p class="sub">Every match from the Round of 32 through the Final. Win or go home.</p>
 </div>
 
 <div class="content">
-    <div class="match-date-nav">
-        <button type="button" id="match-date-prev" class="match-date-btn" onclick="goMatchDate(-1)">←</button>
-        <span id="match-date-label" class="match-date-label"></span>
-        <button type="button" id="match-date-next" class="match-date-btn" onclick="goMatchDate(1)">→</button>
-    </div>
-    <div id="matches-container">
-        <div class="loading" role="status" aria-live="polite"><div class="spinner"></div><p>Loading matches...</p><div class="loading-msg"></div></div>
+    <div id="knockouts-container">
+        <div class="loading" role="status" aria-live="polite"><div class="spinner"></div><p>Loading knockout matches...</p><div class="loading-msg"></div></div>
     </div>
 </div>
 </main>
@@ -68,6 +63,6 @@
 </footer>
 
 <script src="app.js"></script>
-<script>initMatches();</script>
+<script>initKnockouts();</script>
 </body>
 </html>

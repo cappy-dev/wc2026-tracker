@@ -339,6 +339,128 @@ function initTeams() {
     fetchTeams().catch(() => {});
 }
 
+// Knockouts
+const KNOCKOUT_STAGES = [
+    { seasontype: 2, name: 'Round of 32', short: 'R32' },
+    { seasontype: 3, name: 'Round of 16', short: 'R16' },
+    { seasontype: 4, name: 'Quarterfinals', short: 'QF' },
+    { seasontype: 5, name: 'Semifinals', short: 'SF' },
+    { seasontype: 6, name: '3rd Place Match', short: '3rd' },
+    { seasontype: 7, name: 'Final', short: 'Final' },
+];
+
+async function fetchKnockouts() {
+    const container = document.getElementById('knockouts-container');
+    if (!container) return;
+    try {
+        const signal = abortStale('knockouts');
+        // Fetch all knockout stage scoreboards in parallel
+        const results = await Promise.all(
+            KNOCKOUT_STAGES.map(async (stage) => {
+                try {
+                    const data = await fetchWithDedup(
+                        `${API_BASE}/scoreboard?seasontype=${stage.seasontype}`,
+                        signal
+                    );
+                    const events = data.events || [];
+                    // Filter to only get events matching this stage type
+                    const matches = events.map(ev => {
+                        const comp = ev.competitions?.[0];
+                        if (!comp) return null;
+                        const competitors = comp.competitors || [];
+                        return { comp, competitors, event: ev };
+                    }).filter(Boolean);
+                    return { stage, matches };
+                } catch (e) {
+                    return { stage, matches: [], error: true };
+                }
+            })
+        );
+
+        clearLoadingMessages('knockouts-container');
+        let html = '<div class="knockouts-grid">';
+        for (const { stage, matches } of results) {
+            if (matches.length === 0) continue;
+            html += `<div class="knockout-round">`;
+            html += `<div class="knockout-round-header">${stage.name}</div>`;
+            html += `<div class="knockout-round-matches">`;
+            for (const { comp, competitors } of matches) {
+                const statusType = comp.status?.type?.name || '';
+                const statusDetail = comp.status?.type?.description || '';
+                const tl = statusType.toLowerCase();
+                const isLive = tl.includes('in_progress') || tl.includes('halftime') || tl.includes('live') || tl.includes('second_half') || tl.includes('first_half') || (tl.includes('status_') && !tl.includes('scheduled') && !tl.includes('full_time') && !tl.includes('complete') && !tl.includes('postponed'));
+                const isFT = tl.includes('complete') || tl.includes('full_time');
+                const isPen = tl.includes('pen');
+                const isScheduled = tl.includes('scheduled');
+                const clock = comp.status?.displayClock || '';
+                const scores = competitors.map(c => parseInt(c.score));
+                const hasScores = scores.some(s => !isNaN(s) && s > 0);
+                const winnerIdx = isFT && scores[0] !== scores[1] ? scores.indexOf(Math.max(...scores)) : -1;
+                const venue = comp.venue?.fullName || '';
+                const city = comp.venue?.address?.city || '';
+                const venueStr = [venue, city].filter(Boolean).join(', ');
+                const broadcast = comp.broadcasts?.[0]?.names?.join(', ') || '';
+                const date = new Date(comp.date);
+                const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+
+                html += `<div class="ko-match">`;
+                for (let i = 0; i < competitors.length; i++) {
+                    const c = competitors[i];
+                    const t = c.team;
+                    const advance = c.advance;
+                    const isWinner = advance === true;
+                    const isLoser = advance === false;
+                    const rowClass = isWinner ? ' ko-team--advance' : isLoser ? ' ko-team--eliminated' : '';
+                    const scoreVal = hasScores ? (c.score || '–') : '–';
+
+                    html += `<div class="ko-team${rowClass}">`;
+                    html += `<div class="ko-team-info">`;
+                    html += `<img class="team-flag" src="${t.logos?.[0]?.href || ''}" alt="${t.displayName}" loading="lazy" onerror="this.style.display='none'">`;
+                    html += `<span class="ko-team-name">${t.displayName}</span>`;
+                    if (isWinner) html += `<span class="ko-badge ko-badge--advance">&#10003;</span>`;
+                    if (isLoser) html += `<span class="ko-badge ko-badge--out">&times;</span>`;
+                    html += `</div>`;
+                    if (isScheduled && !hasScores) {
+                        html += `<span class="ko-time">${timeStr}</span>`;
+                    } else {
+                        html += `<span class="ko-score${i === winnerIdx ? ' ko-score--winner' : ''}">${scoreVal}</span>`;
+                    }
+                    html += `</div>`;
+                }
+                // Status line
+                if (isLive) {
+                    html += `<div class="ko-status"><span class="status-live">${statusDetail || 'LIVE'}${clock ? ' ' + clock : ''}</span></div>`;
+                } else if (isFT) {
+                    const extra = isPen ? ' (PEN)' : '';
+                    html += `<div class="ko-status"><span class="status-ft">FT${extra}</span></div>`;
+                } else if (isScheduled) {
+                    html += `<div class="ko-status ko-status--scheduled">${dateStr}</div>`;
+                }
+                if (venueStr || broadcast) {
+                    html += `<div class="ko-meta">${[venueStr, broadcast].filter(Boolean).join(' &middot; ')}</div>`;
+                }
+                html += `</div>`;
+            }
+            html += `</div></div>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        clearLoadingMessages('knockouts-container');
+        container.innerHTML = '<div class="error-box">Failed to load knockout matches.</div>';
+    }
+}
+
+function initKnockouts() {
+    startLoadingMessages('knockouts-container', LOADING_MSGS.knockouts);
+    fetchKnockouts().catch(() => {});
+    function refresh() { if (!document.hidden) fetchKnockouts().catch(() => {}); }
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+    setInterval(refresh, 60000);
+}
+
 const LOADING_MSGS = {
     standings: [
         'Loading group tables…',
@@ -355,6 +477,11 @@ const LOADING_MSGS = {
         'Loading scorer data…',
         'Checking goal counts…',
         'Looking up the Golden Boot race…',
+    ],
+    knockouts: [
+        'Loading knockout bracket…',
+        'Fetching knockout results…',
+        'Looking up Round of 32 onwards…',
     ],
     teams: [
         'Loading team data…',

@@ -823,3 +823,178 @@ footer .right a:hover { color: var(--fg); }
     .fm-score-sep { font-size: 18px; }
     .fm-score { min-width: 50px; gap: 2px; }
 }
+
+/* Knockout Matches Styling */
+.knockout-round {
+    margin-bottom: 24px;
+}
+
+.knockout-round-header {
+    font-size: 13px;
+    font-weight: 510;
+    color: var(--fg4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+}
+
+.knockout-round-matches {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ko-match {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .ko-match:hover {
+        transform: translateY(-2px);
+        border-color: rgba(94,106,210,0.25);
+    }
+    .ko-match { will-change: transform; }
+}
+
+.ko-match-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.ko-teams {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ko-team {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-weight: 510;
+}
+
+.ko-team--advance {
+    background: var(--green-dim);
+    border: 1px solid rgba(16,185,129,0.2);
+}
+
+.ko-team--eliminated {
+    opacity: 0.5;
+    background: var(--red-dim);
+    border: 1px solid rgba(239,68,68,0.15);
+}
+
+.ko-team-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.ko-team-name {
+    font-size: 13px;
+    color: var(--fg);
+    white-space: nowrap;
+}
+
+.ko-team-abbr {
+    font-size: 11px;
+    color: var(--fg4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ko-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 510;
+    margin-left: 4px;
+}
+
+.ko-badge--advance {
+    background: var(--green);
+    color: #fff;
+}
+
+.ko-badge--out {
+    background: var(--red);
+    color: #fff;
+}
+
+.ko-score {
+    font-size: 14px;
+    font-weight: 590;
+    color: var(--fg);
+    min-width: 24px;
+    text-align: right;
+}
+
+.ko-score--winner {
+    color: var(--accent-bright);
+}
+
+.ko-status {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--fg3);
+}
+
+.ko-status .status-live {
+    background: var(--green);
+    color: #fff;
+    border-radius: 9999px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 510;
+}
+
+.ko-status .status-ft {
+    background: rgba(255,255,255,0.12);
+    color: var(--fg2);
+    border-radius: 9999px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 510;
+}
+
+.ko-status .status-scheduled {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 9999px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 510;
+}
+
+.ko-status--scheduled {
+    color: var(--fg3);
+}
+
+.ko-meta {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--fg4);
+}
+
+.ko-time {
+    font-size: 12px;
+    font-weight: 510;
+    color: var(--fg3);
+}
