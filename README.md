@@ -9,6 +9,8 @@ Live standings, scores, and match results for the 2026 FIFA World Cup, powered b
 - **Group Standings** - All 12 groups with points, wins, draws, losses, goals for/against, and goal difference
 - **Match Results** - Live scores and final results with status indicators
 - **Top Scorers** - Golden Boot race leaderboard
+- **Teams** - Roster of all qualified nations with flags and abbreviations
+- **Latest News** - Headlines pulled from ESPN on the landing page
 - **Auto-refresh** - Standings and matches update every 60 seconds
 - **Dark mode** - Built for night owls
 
@@ -18,9 +20,12 @@ Static HTML + CSS + vanilla JavaScript. No build step, no framework, no API key 
 
 ## Endpoints Used
 
-- `site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings`
-- `site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard`
-- `sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.world/leaders`
+All requests are client-side against ESPN public endpoints (no API key required).
+
+- `site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings` - group standings and team list
+- `site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=YYYYMMDD` - matches by date
+- `site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/statistics` - top scorers leaderboard
+- `now.core.api.espn.com/v1/sports/news?sport=soccer&leagues=fifa.world&limit=5` - latest news headlines
 
 ## Local Development
 
