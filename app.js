@@ -791,14 +791,383 @@ async function fetchScorerSnippet() {
 }
 
 function initLanding() {
+    fetchFinalsWeekend();
+    fetchFinalsBracket();
+    fetchFinalsTeams();
     fetchFeaturedMatch();
     fetchStandingsSnippet();
     fetchScorerSnippet();
     fetchNews();
     let timer = null;
-    function refresh() { if (!document.hidden) { fetchFeaturedMatch(); fetchStandingsSnippet(); fetchScorerSnippet(); fetchNews(); } }
+    function refresh() { if (!document.hidden) { fetchFinalsWeekend(); fetchFinalsBracket(); fetchFinalsTeams(); fetchFeaturedMatch(); fetchStandingsSnippet(); fetchScorerSnippet(); fetchNews(); } }
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
     timer = setInterval(refresh, 60000);
+}
+
+// ===== Finals Weekend — featured dual match =====
+
+const FINALS_DATES = '20260718-20260719';
+
+function flagUrlFromAbbr(abbr) {
+    if (!abbr) return '';
+    return `https://a.espncdn.com/i/teamlogos/countries/500/${abbr.toLowerCase()}.png`;
+}
+
+async function fetchFinalsWeekend() {
+    const container = document.getElementById('finals-weekend');
+    if (!container) return;
+    try {
+        const signal = abortStale('finals-weekend');
+        const data = await fetchWithDedup(`${API_BASE}/scoreboard?dates=${FINALS_DATES}`, signal);
+        const events = data.events || [];
+        if (events.length === 0) {
+            container.innerHTML = '<div class="finals-weekend-inner"><div class="no-data"><p>Finals match data unavailable</p></div></div>';
+            return;
+        }
+
+        // Sort: 3rd place first, final second (or by date)
+        events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        let html = '<div class="finals-weekend-inner">';
+
+        for (const ev of events) {
+            const comp = ev.competitions?.[0];
+            if (!comp) continue;
+            const competitors = comp.competitors || [];
+            const seasonSlug = ev.season?.slug || '';
+            const isFinal = seasonSlug === 'final' || seasonSlug.includes('final');
+            const is3rd = seasonSlug.includes('3rd') || seasonSlug.includes('third');
+            const label = isFinal ? 'THE FINAL' : is3rd ? 'THIRD PLACE PLAYOFF' : 'FINALS';
+
+            const labelClass = isFinal ? 'fw-match-label--gold' : 'fw-match-label--bronze';
+            const cardClass = isFinal ? 'fw-match-card--final' : '';
+            const trophy = isFinal ? '\u{1F3C6}' : '\u{1F949}';
+
+            const type = comp.status?.type?.name || '';
+            const detail = comp.status?.type?.description || '';
+            const tl = type.toLowerCase();
+            const isLive = tl.includes('in_progress') || tl.includes('halftime') || tl.includes('live') || tl.includes('second_half') || tl.includes('first_half') || (tl.includes('status_') && !tl.includes('scheduled') && !tl.includes('full_time') && !tl.includes('complete') && !tl.includes('postponed'));
+            const isFT = tl.includes('complete') || tl.includes('full_time');
+            const clock = comp.status?.displayClock || '';
+            const scores = competitors.map(c => parseInt(c.score));
+            const winnerIdx = isFT && scores[0] !== scores[1] ? scores.indexOf(Math.max(...scores)) : -1;
+            const venue = comp.venue?.fullName || '';
+            const city = comp.venue?.address?.city || '';
+
+            let badgeHtml;
+            if (isLive) {
+                badgeHtml = `<span class="fw-badge fw-badge--live"><span class="dot"></span> LIVE${clock ? ' ' + clock : ''}</span>`;
+            } else if (isFT) {
+                badgeHtml = `<span class="fw-badge fw-badge--ft">Full Time</span>`;
+            } else {
+                const date = new Date(comp.date);
+                const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+                const dateStr = date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+                badgeHtml = `<span class="fw-badge fw-badge--upcoming">${dateStr} ${timeStr}</span>`;
+            }
+
+            html += `<div class="fw-match-card ${cardClass}">`;
+            html += `<div class="fw-match-label fw-match-label ${labelClass}"><span class="trophy">${trophy}</span> ${label}</div>`;
+            html += `<div class="fw-match-body">`;
+
+            for (let i = 0; i < competitors.length; i++) {
+                const c = competitors[i];
+                const t = c.team;
+                const url = t.logos?.[0]?.href || flagUrlFromAbbr(t.abbreviation);
+                const advance = c.advance;
+                const isWinner = advance === true;
+                html += `<div class="fw-team">`;
+                html += `<img class="fw-team-logo" src="${url}" alt="${t.displayName}" loading="lazy" onerror="this.style.opacity='0.3'">`;
+                html += `<div class="fw-team-name">${t.displayName || ''}</div>`;
+                html += `</div>`;
+                if (i === 0) {
+                    const sc0 = isFT || (isLive && scores.some(s => !isNaN(s) && s > 0)) ? (competitors[0].score || '0') : '0';
+                    const sc1 = isFT || (isLive && scores.some(s => !isNaN(s) && s > 0)) ? (competitors[1]?.score || '0') : '0';
+                    const sc0class = (isLive || (winnerIdx === 0)) ? ' fw-score-num--live' : '';
+                    const sc1class = (isLive || (winnerIdx === 1)) ? ' fw-score-num--live' : '';
+                    const showScores = isFT || (isLive && scores.some(s => !isNaN(s) && s > 0));
+                    if (showScores) {
+                        html += `<div class="fw-center">
+                            <div class="fw-score-row">
+                                <span class="fw-score-num${sc0class}">${sc0}</span>
+                                <span class="fw-score-sep">-</span>
+                                <span class="fw-score-num${sc1class}">${sc1}</span>
+                            </div>
+                        </div>`;
+                    } else {
+                        html += `<div class="fw-center">
+                            <div class="fw-vs">vs</div>
+                            ${badgeHtml}
+                        </div>`;
+                    }
+                }
+            }
+
+            html += `</div>`;
+            if (isFT || isLive) {
+                html += `<div class="fw-venue" style="text-align:center;">${badgeHtml}`;
+            } else {
+                html += `<div class="fw-venue" style="text-align:center;">`;
+            }
+            if (venue || city) {
+                html += `<span class="venue-icon">\u{1F4CD}</span>${[venue, city].filter(Boolean).join(', ')}`;
+            }
+            html += `</div>`;
+            html += `</div>`;
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        container.innerHTML = '<div class="finals-weekend-inner"><div class="error-box">Failed to load finals data.</div></div>';
+    }
+}
+
+// ===== Road to the Final bracket =====
+
+const FINALS_BRACKET_STAGES = [
+    { seasontype: 2, name: 'Round of 32', dates: '20260701-20260704' },
+    { seasontype: 3, name: 'Round of 16', dates: '20260704-20260707' },
+    { seasontype: 4, name: 'Quarterfinals', dates: '20260709-20260712' },
+    { seasontype: 5, name: 'Semifinals', dates: '20260714-20260715' },
+];
+
+async function fetchFinalsBracket() {
+    const container = document.getElementById('finals-bracket');
+    if (!container) return;
+    try {
+        const signal = abortStale('finals-bracket');
+        const results = await Promise.all(
+            FINALS_BRACKET_STAGES.map(async (stage) => {
+                try {
+                    const data = await fetchWithDedup(
+                        `${API_BASE}/scoreboard?dates=${stage.dates}`,
+                        signal
+                    );
+                    const events = data.events || [];
+                    const matches = events.filter(ev => {
+                        const slug = ev.season?.slug || '';
+                        const seasonType = slug.replace(/-/g, '');
+                        const stageType = String(stage.seasontype);
+                        // Match by season slug or date range
+                        const matchMap = {
+                            '2': ['round-of-32'],
+                            '3': ['round-of-16'],
+                            '4': ['quarterfinals'],
+                            '5': ['semifinals'],
+                        };
+                        return matchMap[stageType]?.some(s => slug.includes(s)) || false;
+                    }).map(ev => {
+                        const comp = ev.competitions?.[0] || {};
+                        return {
+                            home: comp.competitors?.[0],
+                            away: comp.competitors?.[1],
+                            status: comp.status,
+                            venue: comp.venue,
+                            notes: comp.notes,
+                        };
+                    }).filter(m => m.home && m.away);
+                    return { stage, matches };
+                } catch (e) {
+                    return { stage, matches: [] };
+                }
+            })
+        );
+
+        let html = '<div class="finals-bracket">';
+        for (const { stage, matches } of results) {
+            if (matches.length === 0) continue;
+            html += `<div class="fb-round">`;
+            html += `<div class="fb-round-header">${stage.name}</div>`;
+            for (const m of matches) {
+                const statusName = (m.status?.type?.name || '').toLowerCase();
+                const isFT = statusName.includes('complete') || statusName.includes('full_time');
+                const isPen = statusName.includes('pen');
+                const homeScore = parseInt(m.home.score) || 0;
+                const awayScore = parseInt(m.away.score) || 0;
+                const homeWins = isFT && homeScore > awayScore;
+                const awayWins = isFT && awayScore > homeScore;
+                const notes = m.notes || [];
+                const noteStr = notes.map(n => n.headline).find(h => h) || '';
+                const homeAdv = m.home.advance;
+                const awayAdv = m.away.advance;
+
+                html += `<div class="fb-match">`;
+                html += `<div class="fb-match-row">`;
+                const homeUrl = m.home.team?.logos?.[0]?.href || flagUrlFromAbbr(m.home.team?.abbreviation);
+                const homeClass = (homeAdv === true || homeWins) ? ' winner' : '';
+                html += `<div class="fb-match-team${homeClass}"><img class="flag" src="${homeUrl}" alt="" loading="lazy" onerror="this.style.display='none'">${m.home.team?.displayName || '?'}</div>`;
+                html += `<div class="fb-match-score${homeClass}">${m.home.score || '0'}</div>`;
+                html += `</div>`;
+                html += `<div class="fb-match-row">`;
+                const awayUrl = m.away.team?.logos?.[0]?.href || flagUrlFromAbbr(m.away.team?.abbreviation);
+                const awayClass = (awayAdv === true || awayWins) ? ' winner' : '';
+                html += `<div class="fb-match-team${awayClass}"><img class="flag" src="${awayUrl}" alt="" loading="lazy" onerror="this.style.display='none'">${m.away.team?.displayName || '?'}</div>`;
+                html += `<div class="fb-match-score${awayClass}">${m.away.score || '0'}</div>`;
+                html += `</div>`;
+                if (noteStr) {
+                    html += `<div class="fb-match-pen">${noteStr}</div>`;
+                }
+                const venue = m.venue?.fullName || '';
+                if (venue) {
+                    html += `<div class="fb-match-venue">${venue}</div>`;
+                }
+                html += `</div>`;
+            }
+            html += `</div>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        container.innerHTML = '<div class="error-box">Failed to load bracket data.</div>';
+    }
+}
+
+// ===== Finals team preview =====
+
+async function fetchFinalsTeams() {
+    const container = document.getElementById('finals-teams');
+    if (!container) return;
+    try {
+        const signal = abortStale('finals-teams');
+        // Get standings to get all team stats
+        const standingsData = await fetchWithDedup(`${API_V2}/standings`, signal);
+
+        // Find the 4 semifinalist teams: Spain, Argentina, England, France
+        const targetTeams = new Map();
+        const semisData = await fetchWithDedup(`${API_BASE}/scoreboard?dates=20260714-20260719`, signal);
+        for (const ev of semisData.events || []) {
+            const comp = ev.competitions?.[0];
+            if (!comp) continue;
+            for (const c of comp.competitors || []) {
+                const t = c.team;
+                if (t && t.abbreviation) {
+                    targetTeams.set(t.abbreviation.toLowerCase(), {
+                        name: t.displayName,
+                        abbr: t.abbreviation,
+                        logo: t.logos?.[0]?.href || flagUrlFromAbbr(t.abbreviation),
+                    });
+                }
+            }
+        }
+
+        // Get their group stage stats from standings
+        const teamStats = {};
+        for (const group of standingsData.children || []) {
+            for (const entry of group.standings?.entries || []) {
+                const team = entry.team;
+                const abbr = team.abbreviation?.toLowerCase();
+                if (!abbr || !targetTeams.has(abbr)) continue;
+                const s = {};
+                entry.stats.forEach(st => { s[st.name] = st.displayValue; });
+                teamStats[abbr] = {
+                    ...targetTeams.get(abbr),
+                    played: s.gamesPlayed || '0',
+                    wins: s.wins || '0',
+                    draws: s.ties || '0',
+                    losses: s.losses || '0',
+                    gf: s.pointsFor || '0',
+                    ga: s.pointsAgainst || '0',
+                    gd: s.pointDifferential || '0',
+                    pts: s.points || '0',
+                };
+            }
+        }
+
+        // Also get their knockout results from the bracket data
+        const koData = await fetchWithDedup(`${API_BASE}/scoreboard?dates=20260701-20260719`, signal);
+        const teamPaths = {};
+        const stageNames = {
+            'round-of-32': 'R32',
+            'round-of-16': 'R16',
+            'quarterfinals': 'QF',
+            'semifinals': 'SF',
+            '3rd-place-match': '3rd',
+            'final': 'Final',
+        };
+        for (const ev of koData.events || []) {
+            const comp = ev.competitions?.[0];
+            if (!comp) continue;
+            const slug = ev.season?.slug || '';
+            const stageLabel = stageNames[slug] || slug;
+            for (const c of comp.competitors || []) {
+                const abbr = c.team?.abbreviation?.toLowerCase();
+                if (!abbr) continue;
+                if (!teamPaths[abbr]) teamPaths[abbr] = [];
+                const opp = comp.competitors?.find(x => x !== c)?.team?.abbreviation || '?';
+                const myScore = c.score || '0';
+                const oppScore = comp.competitors?.find(x => x !== c)?.score || '0';
+                const advanced = c.advance === true;
+                teamPaths[abbr].push({
+                    stage: stageLabel,
+                    result: `${myScore}-${oppScore} vs ${opp.toUpperCase()}`,
+                    advanced: advanced,
+                });
+            }
+        }
+
+        // Determine roles
+        const finalTeams = [];
+        for (const [abbr, data] of Object.entries(teamStats)) {
+            const path = teamPaths[abbr] || [];
+            const role = abbr === 'esp' || abbr === 'arg' ? 'FINAL' : abbr === 'eng' || abbr === 'fra' ? '3rd Place' : '';
+            finalTeams.push({ ...data, path, role });
+        }
+
+        // Sort: Final teams first, then 3rd place
+        finalTeams.sort((a, b) => {
+            if (a.role === 'FINAL' && b.role !== 'FINAL') return -1;
+            if (a.role !== 'FINAL' && b.role === 'FINAL') return 1;
+            return 0;
+        });
+
+        if (finalTeams.length === 0) {
+            container.innerHTML = '<div class="no-data"><p>Team data unavailable</p></div>';
+            return;
+        }
+
+        let html = '<div class="finals-teams-grid">';
+        for (const team of finalTeams) {
+            const roleColor = team.role === 'FINAL' ? 'var(--green)' : 'var(--yellow)';
+            html += `<div class="ft-card">`;
+            html += `<div class="ft-card-header">`;
+            html += `<img class="ft-card-logo" src="${team.logo}" alt="${team.name}" loading="lazy" onerror="this.style.opacity='0.3'">`;
+            html += `<div>`;
+            html += `<div class="ft-card-name">${team.name}</div>`;
+            if (team.role) {
+                html += `<div class="ft-card-role" style="color:${roleColor}">${team.role}</div>`;
+            }
+            html += `</div></div>`;
+
+            if (team.played) {
+                html += `<div class="ft-card-stats">`;
+                html += `<div class="ft-stat"><div class="ft-stat-value">${team.wins}-${team.draws}-${team.losses}</div><div class="ft-stat-label">W-D-L</div></div>`;
+                html += `<div class="ft-stat"><div class="ft-stat-value">${team.gf}:${team.ga}</div><div class="ft-stat-label">Goals</div></div>`;
+                html += `<div class="ft-stat"><div class="ft-stat-value">${team.gd}</div><div class="ft-stat-label">GD</div></div>`;
+                html += `</div>`;
+            }
+
+            if (team.path.length > 0) {
+                html += `<div class="ft-card-path">`;
+                html += `<span class="path-label">Road to Finals</span>`;
+                const validPath = team.path.filter(p => p.stage && p.result);
+                for (const p of validPath.slice(-5)) {
+                    const status = p.advanced === true ? '<span style="color:var(--green)">&#10003;</span>' : p.advanced === false ? '<span style="color:var(--red)">&#10007;</span>' : '';
+                    html += `<div>${p.stage}: ${p.result} ${status}</div>`;
+                }
+                html += `</div>`;
+            }
+
+            html += `</div>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        container.innerHTML = '<div class="error-box">Failed to load team preview.</div>';
+    }
 }
 
 initTheme();

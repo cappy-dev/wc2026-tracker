@@ -998,3 +998,351 @@ footer .right a:hover { color: var(--fg); }
     font-weight: 510;
     color: var(--fg3);
 }
+
+/* =============================================
+   Finals Weekend — featured dual match
+   ============================================= */
+
+.finals-weekend {
+    position: relative; z-index: 1;
+    background:
+        radial-gradient(ellipse 1000px 600px at 50% 30%, rgba(30,215,96,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 600px 400px at 30% 80%, rgba(94,106,210,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse 500px 300px at 80% 20%, rgba(245,158,11,0.04) 0%, transparent 50%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.finals-weekend-inner {
+    max-width: 1280px; margin: 0 auto; padding: 40px 24px;
+}
+
+.fw-skeleton {
+    text-align: center;
+}
+
+.fw-card-skeleton {
+    display: flex; align-items: center; gap: 24px; justify-content: center;
+    padding: 16px 0;
+}
+
+/* Finals match cards */
+.fw-match-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.fw-match-card + .fw-match-card {
+    margin-top: 20px;
+}
+
+.fw-match-card--final {
+    border-color: rgba(30,215,96,0.25);
+    box-shadow: 0 0 40px rgba(30,215,96,0.05);
+}
+
+.fw-match-label {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+}
+
+.fw-match-label--bronze {
+    color: var(--yellow);
+}
+
+.fw-match-label--gold {
+    color: var(--green);
+}
+
+.fw-match-label .trophy {
+    font-size: 16px;
+}
+
+.fw-match-body {
+    padding: 24px 20px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 24px;
+}
+
+.fw-team {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px; width: 180px;
+}
+
+.fw-team-logo {
+    width: 80px; height: 80px; border-radius: 50%;
+    object-fit: contain;
+    background: rgba(255,255,255,0.04);
+    border: 2px solid rgba(255,255,255,0.06);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.fw-team:hover .fw-team-logo {
+    transform: scale(1.05);
+    border-color: rgba(255,255,255,0.12);
+}
+
+.fw-team-name {
+    font-size: 16px; font-weight: 590;
+    color: var(--fg); text-align: center;
+    line-height: 1.3;
+}
+
+.fw-team-record {
+    font-size: 11px; color: var(--fg4);
+    text-align: center;
+}
+
+.fw-center {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    min-width: 80px;
+}
+
+.fw-score-row {
+    display: flex; align-items: center; gap: 12px;
+}
+
+.fw-score-num {
+    font-size: 32px; font-weight: 590;
+    color: var(--fg);
+    letter-spacing: -1px;
+    font-feature-settings: "tnum";
+    line-height: 1;
+}
+
+.fw-score-num--live { color: var(--accent-bright); }
+
+.fw-score-sep {
+    font-size: 24px; font-weight: 300;
+    color: var(--fg4);
+    line-height: 1;
+}
+
+.fw-vs {
+    font-size: 13px; color: var(--fg4);
+    font-weight: 400;
+}
+
+.fw-time {
+    font-size: 12px; font-weight: 510;
+    color: var(--fg3);
+    margin-top: 2px;
+}
+
+.fw-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 9999px;
+    padding: 3px 10px;
+    font-size: 11px; font-weight: 510;
+    white-space: nowrap;
+}
+
+.fw-badge--live {
+    background: var(--green); color: #000;
+}
+
+.fw-badge--upcoming {
+    background: rgba(30,215,96,0.12);
+    border: 1px solid rgba(30,215,96,0.25);
+    color: var(--green);
+}
+
+.fw-badge--ft {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--fg3);
+}
+
+:root[data-theme="light"] .fw-badge--ft {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.08);
+}
+
+.fw-venue {
+    margin-top: 12px; padding: 0 20px 16px;
+    text-align: center;
+    font-size: 12px; color: var(--fg4);
+}
+
+.fw-venue .venue-icon {
+    margin-right: 4px;
+}
+
+/* Road to the Final bracket */
+.finals-bracket {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.fb-round {
+    display: flex; flex-direction: column;
+    gap: 12px;
+}
+
+.fb-round-header {
+    font-size: 12px; font-weight: 590;
+    color: var(--fg3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+}
+
+.fb-match {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+}
+
+.fb-match-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+    line-height: 1.8;
+}
+
+.fb-match-team {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--fg2);
+}
+
+.fb-match-team.winner {
+    color: var(--fg); font-weight: 590;
+}
+
+.fb-match-team .flag {
+    width: 16px; height: 12px; border-radius: 2px;
+    object-fit: cover;
+    background: var(--surface-hover);
+    flex-shrink: 0;
+}
+
+.fb-match-score {
+    font-size: 13px; font-weight: 590;
+    color: var(--fg);
+    font-feature-settings: "tnum";
+    min-width: 18px; text-align: right;
+}
+
+.fb-match-score.winner {
+    color: var(--accent-bright);
+}
+
+.fb-match-pen {
+    font-size: 10px; color: var(--fg4);
+    margin-left: 2px;
+}
+
+.fb-match-venue {
+    font-size: 10px; color: var(--fg4);
+    margin-top: 6px; padding-top: 6px;
+    border-top: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+    .finals-bracket { grid-template-columns: 1fr; }
+}
+
+/* Finals team preview cards */
+.finals-teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.ft-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex; flex-direction: column;
+    gap: 12px;
+}
+
+.ft-card-header {
+    display: flex; align-items: center; gap: 12px;
+}
+
+.ft-card-logo {
+    width: 48px; height: 48px; border-radius: 50%;
+    object-fit: contain;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+}
+
+.ft-card-name {
+    font-size: 16px; font-weight: 590;
+    color: var(--fg);
+}
+
+.ft-card-role {
+    font-size: 11px; color: var(--fg4);
+    margin-top: 2px;
+}
+
+.ft-card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+.ft-stat {
+    text-align: center;
+    padding: 8px 4px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px;
+}
+
+.ft-stat-value {
+    font-size: 18px; font-weight: 590;
+    color: var(--fg);
+    font-feature-settings: "tnum";
+}
+
+.ft-stat-label {
+    font-size: 10px; color: var(--fg4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.ft-card-path {
+    font-size: 11px; color: var(--fg3);
+    line-height: 1.5;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.ft-card-path .path-label {
+    font-size: 10px; font-weight: 510;
+    color: var(--fg4);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .fw-match-body { gap: 16px; }
+    .fw-team { width: 130px; }
+    .fw-team-logo { width: 60px; height: 60px; }
+    .fw-team-name { font-size: 14px; }
+    .fw-score-num { font-size: 26px; }
+    .finals-teams-grid { grid-template-columns: 1fr; }
+}
